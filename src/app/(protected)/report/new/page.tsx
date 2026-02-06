@@ -21,9 +21,9 @@ interface Template {
 }
 
 const PERIODS = [
-  { value: 'annual', label: 'Helarsrapport' },
-  { value: 'h1', label: 'Halvar 1 (jan-jun)' },
-  { value: 'h2', label: 'Halvar 2 (jul-dec)' },
+  { value: 'annual', label: 'Helårsrapport' },
+  { value: 'h1', label: 'Halvår 1 (jan-jun)' },
+  { value: 'h2', label: 'Halvår 2 (jul-dec)' },
   { value: 'q1', label: 'Kvartal 1' },
   { value: 'q2', label: 'Kvartal 2' },
   { value: 'q3', label: 'Kvartal 3' },
@@ -106,7 +106,7 @@ export default function NewReportPage() {
       const { data: report } = await res.json()
       router.push(`/report/${report.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nagot gick fel')
+      setError(err instanceof Error ? err.message : 'Något gick fel')
     } finally {
       setIsCreating(false)
     }
@@ -133,7 +133,7 @@ export default function NewReportPage() {
 
       <h1 className="text-2xl font-bold mb-2">Skapa ny rapport</h1>
       <p className="text-[var(--foreground-secondary)] mb-8">
-        Valj en mall och ange grunduppgifter for din rapport.
+        Välj en mall och ange grunduppgifter för din rapport.
       </p>
 
       <div className="space-y-8">
@@ -147,13 +147,13 @@ export default function NewReportPage() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="T.ex. Verksamhetsberattelse 2025"
+            placeholder="T.ex. Verksamhetsberättelse 2025"
             className="input"
             autoFocus
           />
         </div>
 
-        {/* Ar och period */}
+        {/* År och period */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label
@@ -161,7 +161,7 @@ export default function NewReportPage() {
               className="block text-sm font-medium mb-2"
             >
               <Calendar className="w-4 h-4 inline mr-1" />
-              Ar
+              År
             </label>
             <input
               id="year"
@@ -195,9 +195,9 @@ export default function NewReportPage() {
           </div>
         </div>
 
-        {/* Valj mall */}
+        {/* Välj mall */}
         <div>
-          <h2 className="text-lg font-semibold mb-3">Valj rapportmall</h2>
+          <h2 className="text-lg font-semibold mb-3">Välj rapportmall</h2>
           <div className="space-y-3">
             {templates.map((template) => {
               const isSelected = selectedTemplate === template.id

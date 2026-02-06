@@ -17,7 +17,7 @@ import { useState } from 'react'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/report/new', label: 'Ny rapport', icon: Plus },
-  { href: '/settings', label: 'Installningar', icon: Settings },
+  { href: '/settings', label: 'Inställningar', icon: Settings },
 ]
 
 export default function Sidebar() {

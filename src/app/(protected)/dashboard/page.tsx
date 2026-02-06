@@ -100,7 +100,7 @@ export default function DashboardPage() {
   }
 
   const handleDelete = async (reportId: string) => {
-    if (!confirm('Ar du saker pa att du vill radera denna rapport?')) return
+    if (!confirm('Är du säker på att du vill radera denna rapport?')) return
 
     setDeleteId(reportId)
     const res = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' })
@@ -150,7 +150,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Snabbstatistik */}
+      {/* Snabbstatistik  */}
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-5">
           <p className="text-sm text-[var(--foreground-muted)] mb-1">
@@ -169,7 +169,7 @@ export default function DashboardPage() {
             Rapporter kvar
           </p>
           <p className="text-2xl font-bold">
-            {reportsRemaining === Infinity ? 'Obegransat' : reportsRemaining}
+            {reportsRemaining === Infinity ? 'Obegränsat' : reportsRemaining}
           </p>
         </div>
       </div>
@@ -182,8 +182,8 @@ export default function DashboardPage() {
             <div>
               <p className="font-medium">Gratisplan</p>
               <p className="text-sm text-[var(--foreground-secondary)]">
-                Du har {reportsRemaining} rapport(er) kvar pa gratisplanen.
-                Uppgradera for att skapa fler rapporter och fa tillgang till
+                Du har {reportsRemaining} rapport(er) kvar på gratisplanen.
+                Uppgradera för att skapa fler rapporter och få tillgång till
                 PDF-export.
               </p>
             </div>
@@ -195,13 +195,13 @@ export default function DashboardPage() {
       {reports.length === 0 ? (
         <div className="card p-12 text-center">
           <FileText className="w-12 h-12 text-[var(--foreground-muted)] mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Inga rapporter annu</h3>
+          <h3 className="text-lg font-semibold mb-2">Inga rapporter ännu</h3>
           <p className="text-[var(--foreground-muted)] mb-6">
-            Skapa din forsta verksamhetsrapport for att komma igang.
+            Skapa din första verksamhetsrapport för att komma igång.
           </p>
           <Link href="/report/new" className="btn btn-primary">
             <Plus className="w-4 h-4" />
-            Skapa din forsta rapport
+            Skapa din första rapport
           </Link>
         </div>
       ) : (

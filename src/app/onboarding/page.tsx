@@ -23,13 +23,13 @@ import ReferenceUploader from '@/components/report/ReferenceUploader'
 
 // Organisationstyper med ikoner och etiketter
 const ORG_TYPES = [
-  { value: 'association', label: 'Forening', icon: Users, description: 'Ideell eller ekonomisk forening' },
-  { value: 'foundation', label: 'Stiftelse', icon: Landmark, description: 'Stiftelse med angivet andamal' },
-  { value: 'cooperative', label: 'Kooperativ', icon: Handshake, description: 'Ekonomisk forening / kooperativ' },
-  { value: 'company', label: 'Foretag', icon: Briefcase, description: 'Aktiebolag, handelsbolag etc.' },
+  { value: 'association', label: 'Förening', icon: Users, description: 'Ideell eller ekonomisk förening' },
+  { value: 'foundation', label: 'Stiftelse', icon: Landmark, description: 'Stiftelse med angivet ändamål' },
+  { value: 'cooperative', label: 'Kooperativ', icon: Handshake, description: 'Ekonomisk förening / kooperativ' },
+  { value: 'company', label: 'Företag', icon: Briefcase, description: 'Aktiebolag, handelsbolag etc.' },
   { value: 'municipality', label: 'Kommun / Myndighet', icon: Building2, description: 'Kommunalt bolag eller myndighet' },
-  { value: 'faith', label: 'Trossamfund', icon: Church, description: 'Kyrka, moske eller annat samfund' },
-  { value: 'union', label: 'Fackforbund / Branschorg.', icon: Factory, description: 'Fackforbund eller arbetsgivarorganisation' },
+  { value: 'faith', label: 'Trossamfund', icon: Church, description: 'Kyrka, moské eller annat samfund' },
+  { value: 'union', label: 'Fackförbund / Branschorg.', icon: Factory, description: 'Fackförbund eller arbetsgivarorganisation' },
   { value: 'other', label: 'Annat', icon: HelpCircle, description: 'Annan typ av organisation' },
 ] as const
 
@@ -38,7 +38,7 @@ const SECTORS = [
   { value: 'sports', label: 'Idrott' },
   { value: 'social', label: 'Social omsorg' },
   { value: 'education', label: 'Utbildning' },
-  { value: 'healthcare', label: 'Halso- & sjukvard' },
+  { value: 'healthcare', label: 'Hälso- & sjukvård' },
   { value: 'other', label: 'Annat' },
 ] as const
 
@@ -48,21 +48,21 @@ const TONALITY_EXAMPLES = [
     label: 'Formell',
     score: 0.9,
     example:
-      'Styrelsen konstaterar att verksamhetsaret 2025 praglade av en positiv utveckling. Organisationens verksamhet har bedrivits i enlighet med stadgarna och de av arsmoted beslutade riktlinjerna.',
+      'Styrelsen konstaterar att verksamhetsåret 2025 präglades av en positiv utveckling. Organisationens verksamhet har bedrivits i enlighet med stadgarna och de av årsmötet beslutade riktlinjerna.',
   },
   {
     value: 'semi-formal',
     label: 'Semi-formell',
     score: 0.5,
     example:
-      'Under 2025 har vi sett en positiv utveckling pa flera omraden. Vi har fortsatt att arbeta mot vara uppsatta mal och ar nojda med de resultat vi uppnatt under aret.',
+      'Under 2025 har vi sett en positiv utveckling på flera områden. Vi har fortsatt att arbeta mot våra uppsatta mål och är nöjda med de resultat vi uppnått under året.',
   },
   {
     value: 'conversational',
     label: 'Vardaglig',
     score: 0.2,
     example:
-      'Vi har haft ett fantastiskt ar! Med massor av roliga aktiviteter, nya samarbeten och engagerade medlemmar har vi verkligen tagit stora steg framat.',
+      'Vi har haft ett fantastiskt år! Med massor av roliga aktiviteter, nya samarbeten och engagerade medlemmar har vi verkligen tagit stora steg framåt.',
   },
 ] as const
 
@@ -165,7 +165,7 @@ export default function OnboardingPage() {
         const { data: org } = await orgRes.json()
         setCreatedOrgId(org.id)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Nagot gick fel')
+        setError(err instanceof Error ? err.message : 'Något gick fel')
         setIsSubmitting(false)
         return
       }
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
 
       router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nagot gick fel')
+      setError(err instanceof Error ? err.message : 'Något gick fel')
     } finally {
       setIsSubmitting(false)
     }
@@ -262,9 +262,9 @@ export default function OnboardingPage() {
         {/* Steg 1: Organisationstyp */}
         {state.step === 1 && (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold mb-2">Vilken typ av organisation ar ni?</h2>
+            <h2 className="text-2xl font-bold mb-2">Vilken typ av organisation är ni?</h2>
             <p className="text-[var(--foreground-secondary)] mb-8">
-              Vi anpassar mallar och sprak efter er organisationstyp.
+              Vi anpassar mallar och språk efter er organisationstyp.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
           <div className="animate-fadeIn">
             <h2 className="text-2xl font-bold mb-2">Beskriv er organisation</h2>
             <p className="text-[var(--foreground-secondary)] mb-8">
-              Vi anvander detta for att anpassa era rapporter.
+              Vi använder detta för att anpassa era rapporter.
             </p>
 
             <div className="space-y-6">
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={state.name}
                   onChange={(e) => updateState({ name: e.target.value })}
-                  placeholder="T.ex. Lunds Kulturforening"
+                  placeholder="T.ex. Lunds Kulturförening"
                   className="input"
                   autoFocus
                 />
@@ -387,8 +387,8 @@ export default function OnboardingPage() {
               Vilken ton passar er organisation?
             </h2>
             <p className="text-[var(--foreground-secondary)] mb-8">
-              Valj den stil som bast representerar hur ni vill att era rapporter ska lata.
-              Ni kan andra detta senare.
+              Välj den stil som bäst representerar hur ni vill att era rapporter ska låta.
+              Ni kan ändra detta senare.
             </p>
 
             <div className="space-y-4">
@@ -432,8 +432,8 @@ export default function OnboardingPage() {
               Ladda upp ett referensdokument
             </h2>
             <p className="text-[var(--foreground-secondary)] mb-8">
-              Har ni en tidigare verksamhetsberattelse? Ladda upp den sa lar sig AI:n er stil.
-              Detta steg ar valfritt.
+              Har ni en tidigare verksamhetsberättelse? Ladda upp den så lär sig AI:n er stil.
+              Detta steg är valfritt.
             </p>
 
             <ReferenceUploader
@@ -448,7 +448,7 @@ export default function OnboardingPage() {
                 className="mt-6 flex items-center gap-2 text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground-secondary)] transition-colors"
               >
                 <SkipForward className="w-4 h-4" />
-                Hoppa over detta steg
+                Hoppa över detta steg
               </button>
             )}
           </div>
@@ -457,9 +457,9 @@ export default function OnboardingPage() {
         {/* Steg 5: Valj mall */}
         {state.step === 5 && (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold mb-2">Valj en rapportmall</h2>
+            <h2 className="text-2xl font-bold mb-2">Välj en rapportmall</h2>
             <p className="text-[var(--foreground-secondary)] mb-8">
-              Valj en mall som passar er organisation. Ni kan anpassa den senare
+              Välj en mall som passar er organisation. Ni kan anpassa den senare
               eller skapa egna mallar.
             </p>
 
@@ -568,12 +568,12 @@ export default function OnboardingPage() {
               </>
             ) : state.step === totalSteps ? (
               <>
-                Slutfor
+                Slutför
                 <Check className="w-4 h-4" />
               </>
             ) : (
               <>
-                Nasta
+                Nästa
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
