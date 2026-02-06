@@ -32,8 +32,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Fil och org_id krävs' }, { status: 400 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Validate membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', orgId)
@@ -59,8 +61,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
-
-  const admin = getSupabaseAdmin()
 
   // Upload to Supabase Storage
   const filePath = `${orgId}/${Date.now()}-${file.name}`
