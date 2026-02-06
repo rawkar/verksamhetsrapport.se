@@ -104,6 +104,18 @@ export async function POST(request: Request) {
   // Använd admin-klienten för att kringgå RLS
   const admin = getSupabaseAdmin()
 
+  // Säkerställ att profilen finns (kan saknas om trigger inte kördes)
+  await admin
+    .from('profiles')
+    .upsert(
+      {
+        id: user.id,
+        email: user.email!,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+      },
+      { onConflict: 'id' }
+    )
+
   // Kontrollera att slug är unik
   const { data: existing } = await admin
     .from('organizations')
