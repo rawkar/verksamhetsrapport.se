@@ -43,7 +43,7 @@ export async function GET(
 
   const { data: versions } = await admin
     .from('report_versions')
-    .select('id, version_number, created_at, created_by')
+    .select('id, version_number, created_at, created_by, generated_content')
     .eq('report_id', reportId)
     .order('version_number', { ascending: false })
 

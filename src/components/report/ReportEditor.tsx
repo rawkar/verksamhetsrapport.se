@@ -161,7 +161,13 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
             </span>
           )}
 
-          <VersionHistory reportId={report.id} />
+          <VersionHistory
+            reportId={report.id}
+            onRestore={(content) => {
+              setGeneratedContent(content)
+              router.refresh()
+            }}
+          />
 
           <GenerateButton
             isGenerating={isGenerating}

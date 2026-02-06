@@ -186,6 +186,9 @@ export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
 
   const blocks = parseMarkdown(content)
 
+  // Track heading positions for bookmarks
+  const headingPositions: { title: string; page: number; y: number; level: number }[] = []
+
   for (const block of blocks) {
     switch (block.type) {
       case 'h1': {
@@ -194,6 +197,7 @@ export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
           y = PAGE.marginTop
         }
         y += 8
+        headingPositions.push({ title: block.text, page: doc.getNumberOfPages(), y, level: 1 })
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(18)
         doc.setTextColor(...TRS.blue)
@@ -210,6 +214,7 @@ export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
           y = PAGE.marginTop
         }
         y += 4
+        headingPositions.push({ title: block.text, page: doc.getNumberOfPages(), y, level: 2 })
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(14)
         doc.setTextColor(...TRS.blue)
@@ -230,6 +235,7 @@ export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
           y = PAGE.marginTop
         }
         y += 5
+        headingPositions.push({ title: block.text, page: doc.getNumberOfPages(), y, level: 3 })
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(11)
         doc.setTextColor(...TRS.dark)
@@ -316,6 +322,35 @@ export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
     doc.setDrawColor(...TRS.ruleLine)
     doc.setLineWidth(0.2)
     doc.line(PAGE.marginX, PAGE.height - 16, PAGE.width - PAGE.marginX, PAGE.height - 16)
+  }
+
+  // --- Add PDF outline/bookmarks for accessibility ---
+  // Also add internal links from TOC to headings
+  if (sections && sections.length > 0 && headingPositions.length > 0) {
+    const tocPageNum = 2 // TOC is always page 2
+
+    // Add clickable links on the TOC page
+    doc.setPage(tocPageNum)
+    let tocY = PAGE.marginTop + 14 // after title + line
+
+    for (const s of sections) {
+      const indent = s.level === 1 ? 0 : 8
+      const lineHeight = s.level === 1 ? 8 : 6
+
+      // Find matching heading in content
+      const match = headingPositions.find((h) => h.title === s.title)
+      if (match) {
+        doc.link(
+          PAGE.marginX + indent,
+          tocY - 4,
+          CONTENT_WIDTH - indent,
+          lineHeight,
+          { pageNumber: match.page }
+        )
+      }
+
+      tocY += lineHeight
+    }
   }
 
   return doc.output('arraybuffer')

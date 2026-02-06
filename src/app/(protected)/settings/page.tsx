@@ -2,10 +2,84 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Save, Building2, Users, FileText, CreditCard, Upload } from 'lucide-react'
+import { Loader2, Save, Building2, Users, FileText, CreditCard, Upload, Trash2, CheckCircle2 } from 'lucide-react'
 import BillingOverview from '@/components/billing/BillingOverview'
 import UpgradeBanner from '@/components/billing/UpgradeBanner'
 import ReferenceUploader from '@/components/report/ReferenceUploader'
+
+interface ReferenceDoc {
+  id: string
+  file_name: string
+  file_type: string
+  file_size_bytes: number
+  is_analyzed: boolean
+  created_at: string
+}
+
+function ReferenceList({
+  orgId,
+  references,
+  onDeleted,
+}: {
+  orgId: string
+  references: ReferenceDoc[]
+  onDeleted: () => void
+}) {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Är du säker på att du vill ta bort detta referensdokument?')) return
+    setDeletingId(id)
+    const res = await fetch(`/api/references/${id}`, { method: 'DELETE' })
+    if (res.ok) onDeleted()
+    setDeletingId(null)
+  }
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  if (references.length === 0) return null
+
+  return (
+    <div>
+      <h3 className="font-medium mb-3">Uppladdade dokument</h3>
+      <div className="space-y-2">
+        {references.map((ref) => (
+          <div key={ref.id} className="card p-4 flex items-center gap-3">
+            <FileText className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">{ref.file_name}</p>
+              <p className="text-xs text-[var(--foreground-muted)]">
+                {formatSize(ref.file_size_bytes)} · {ref.file_type.toUpperCase()}
+                {ref.is_analyzed && (
+                  <span className="ml-2 text-[var(--color-success)]">
+                    <CheckCircle2 className="w-3 h-3 inline mr-0.5" />
+                    Analyserad
+                  </span>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => handleDelete(ref.id)}
+              disabled={deletingId === ref.id}
+              className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--color-error)] hover:bg-[rgba(255,43,15,0.05)] transition-colors"
+              title="Ta bort"
+            >
+              {deletingId === ref.id ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface Org {
   id: string
@@ -40,6 +114,7 @@ export default function SettingsPage() {
   const [description, setDescription] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviting, setInviting] = useState(false)
+  const [references, setReferences] = useState<ReferenceDoc[]>([])
 
   useEffect(() => {
     loadData()
@@ -68,7 +143,18 @@ export default function SettingsPage() {
       setMembers(mData.data || [])
     }
 
+    // Load references
+    await loadReferences(o.id)
+
     setIsLoading(false)
+  }
+
+  const loadReferences = async (orgId: string) => {
+    const refRes = await fetch('/api/references')
+    if (refRes.ok) {
+      const refData = await refRes.json()
+      setReferences(refData.data || [])
+    }
   }
 
   const handleSaveOrg = async () => {
@@ -218,8 +304,9 @@ export default function SettingsPage() {
             <p className="text-sm text-[var(--foreground-muted)] mb-4">
               Ladda upp en tidigare verksamhetsberättelse så lär sig AI:n er stil.
             </p>
-            <ReferenceUploader orgId={org.id} />
+            <ReferenceUploader orgId={org.id} onUploaded={() => loadReferences(org.id)} />
           </div>
+          <ReferenceList orgId={org.id} references={references} onDeleted={() => loadReferences(org.id)} />
         </div>
       )}
 

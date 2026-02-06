@@ -45,6 +45,13 @@ STILREGLER (MYCKET VIKTIGT):
 - Texten ska låta som om en erfaren kommunikatör har skrivit den – inte som en AI.
 - Håll texten koncis. Skriv det som behövs, inte mer. Undvik utfyllnadsmeningar.
 
+FORMATREGLER (KRITISKT – undvik AI-fingeravtryck):
+- Använd INTE tankstreck (–) eller m-streck (—) förutom i undantagsfall där det verkligen tjänar texten. Använd kommatecken, kolon eller punkt istället.
+- Använd INTE punktlistor om det inte rör sig om en faktisk uppräkning av 4+ distinkta poster. Skriv hellre löpande text. En rapport är inte en PowerPoint.
+- Håll meningarna KORTA. Max 25–30 ord per mening som regel. Bryt upp långa meningar.
+- Undvik meningar med mer än 2 kommatecken. Dela upp dem i flera meningar.
+- Skriv i löpande text och sammanhängande stycken. Rubriker följs av prosa, inte av listor.
+
 OUTPUT-KRAV:
 - Komplett rapport i textformat
 - Alla rubriker och underrubriker ska finnas med
