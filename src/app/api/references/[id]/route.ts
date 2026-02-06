@@ -16,8 +16,10 @@ export async function DELETE(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Get doc to verify ownership
-  const { data: doc } = await supabase
+  const { data: doc } = await admin
     .from('reference_documents')
     .select('id, org_id, file_url')
     .eq('id', docId)
@@ -28,7 +30,7 @@ export async function DELETE(
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', doc.org_id)
@@ -38,8 +40,6 @@ export async function DELETE(
   if (!member) {
     return NextResponse.json({ error: 'Inte behörig' }, { status: 403 })
   }
-
-  const admin = getSupabaseAdmin()
 
   // Delete file from storage
   if (doc.file_url) {

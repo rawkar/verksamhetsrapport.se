@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export async function POST(
   _request: NextRequest,
@@ -15,8 +16,10 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Get report
-  const { data: report } = await supabase
+  const { data: report } = await admin
     .from('reports')
     .select('id, org_id')
     .eq('id', reportId)
@@ -27,7 +30,7 @@ export async function POST(
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -39,7 +42,7 @@ export async function POST(
   }
 
   // Get the version to restore
-  const { data: version } = await supabase
+  const { data: version } = await admin
     .from('report_versions')
     .select('sections_content, generated_content')
     .eq('report_id', reportId)
@@ -51,7 +54,7 @@ export async function POST(
   }
 
   // Restore: update the report with the version's content
-  const { error } = await supabase
+  const { error } = await admin
     .from('reports')
     .update({
       sections_content: version.sections_content,

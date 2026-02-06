@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AnthropicClient } from '@/lib/ai/clients/anthropic-client'
 import { OpenAIClient } from '@/lib/ai/clients/openai-client'
 import type { LLMClient } from '@/lib/ai/clients/types'
@@ -19,6 +20,8 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   const body = await request.json()
   const { section_id, feedback } = body as { section_id: string; feedback?: string }
 
@@ -27,7 +30,7 @@ export async function POST(
   }
 
   // Get report
-  const { data: report } = await supabase
+  const { data: report } = await admin
     .from('reports')
     .select('*')
     .eq('id', reportId)
@@ -38,7 +41,7 @@ export async function POST(
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -50,7 +53,7 @@ export async function POST(
   }
 
   // Get org
-  const { data: org } = await supabase
+  const { data: org } = await admin
     .from('organizations')
     .select('*')
     .eq('id', report.org_id)
@@ -67,7 +70,7 @@ export async function POST(
   // Get template for section title
   let sectionTitle = section_id
   if (report.template_id) {
-    const { data: template } = await supabase
+    const { data: template } = await admin
       .from('report_templates')
       .select('sections')
       .eq('id', report.template_id)
@@ -131,7 +134,7 @@ Behåll ALLA detaljer från originaltexten. Förkorta INTE.`
     )
 
     // Log usage
-    await supabase.from('ai_usage_log').insert({
+    await admin.from('ai_usage_log').insert({
       org_id: report.org_id,
       report_id: reportId,
       user_id: user.id,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getStripe, PRICE_IDS } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
@@ -11,6 +12,8 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
+
+  const admin = getSupabaseAdmin()
 
   const body = await request.json()
   const { plan, org_id } = body as { plan: string; org_id: string }
@@ -25,7 +28,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', org_id)
@@ -37,7 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Get or create Stripe customer
-  const { data: org } = await supabase
+  const { data: org } = await admin
     .from('organizations')
     .select('stripe_customer_id, name')
     .eq('id', org_id)
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
     })
     customerId = customer.id
 
-    await supabase
+    await admin
       .from('organizations')
       .update({ stripe_customer_id: customerId })
       .eq('id', org_id)

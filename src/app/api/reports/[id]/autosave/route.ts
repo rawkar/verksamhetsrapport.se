@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { autosaveSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -21,8 +22,10 @@ export async function PATCH(
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   // Hämta rapport för att kontrollera org_id
-  const { data: existing } = await supabase
+  const { data: existing } = await admin
     .from('reports')
     .select('org_id')
     .eq('id', id)
@@ -36,7 +39,7 @@ export async function PATCH(
   }
 
   // Kontrollera membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -66,7 +69,7 @@ export async function PATCH(
     )
   }
 
-  const { data: report, error } = await supabase
+  const { data: report, error } = await admin
     .from('reports')
     .update({
       sections_content: result.data.sections_content,

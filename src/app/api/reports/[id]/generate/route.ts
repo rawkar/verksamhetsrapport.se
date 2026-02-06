@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AnthropicClient } from '@/lib/ai/clients/anthropic-client'
 import { OpenAIClient } from '@/lib/ai/clients/openai-client'
 import { generateReport } from '@/lib/ai/report-generator'
@@ -27,12 +28,13 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
   const body = await request.json()
   const sectionsContent: SectionsContent = body.sections_content
   const customInstructions: string | undefined = body.custom_instructions
 
   // Get report
-  const { data: report } = await supabase
+  const { data: report } = await admin
     .from('reports')
     .select('*')
     .eq('id', reportId)
@@ -43,7 +45,7 @@ export async function POST(
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -56,9 +58,9 @@ export async function POST(
 
   // Get org and template
   const [orgRes, templateRes] = await Promise.all([
-    supabase.from('organizations').select('*').eq('id', report.org_id).single(),
+    admin.from('organizations').select('*').eq('id', report.org_id).single(),
     report.template_id
-      ? supabase.from('report_templates').select('*').eq('id', report.template_id).single()
+      ? admin.from('report_templates').select('*').eq('id', report.template_id).single()
       : Promise.resolve({ data: null }),
   ])
 
@@ -83,7 +85,7 @@ export async function POST(
   }
 
   // Update status to generating
-  await supabase.from('reports').update({ status: 'generating' }).eq('id', reportId)
+  await admin.from('reports').update({ status: 'generating' }).eq('id', reportId)
 
   // Create LLM client
   let client: LLMClient
@@ -96,7 +98,7 @@ export async function POST(
     client = new OpenAIClient(process.env.OPENAI_API_KEY)
     modelName = 'gpt-4o'
   } else {
-    await supabase.from('reports').update({ status: 'draft' }).eq('id', reportId)
+    await admin.from('reports').update({ status: 'draft' }).eq('id', reportId)
     return NextResponse.json({ error: 'Ingen AI API-nyckel konfigurerad' }, { status: 500 })
   }
 
@@ -107,7 +109,7 @@ export async function POST(
     }
 
     // Fetch latest analyzed reference document for style
-    const { data: refDocs } = await supabase
+    const { data: refDocs } = await admin
       .from('reference_documents')
       .select('style_analysis')
       .eq('org_id', report.org_id)
@@ -128,7 +130,7 @@ export async function POST(
     })
 
     // Save result
-    await supabase
+    await admin
       .from('reports')
       .update({
         status: 'review',
@@ -146,7 +148,7 @@ export async function POST(
       .eq('id', reportId)
 
     // Auto-save version snapshot
-    const { data: latestVersion } = await supabase
+    const { data: latestVersion } = await admin
       .from('report_versions')
       .select('version_number')
       .eq('report_id', reportId)
@@ -154,7 +156,7 @@ export async function POST(
       .limit(1)
       .single()
 
-    await supabase.from('report_versions').insert({
+    await admin.from('report_versions').insert({
       report_id: reportId,
       version_number: (latestVersion?.version_number || 0) + 1,
       sections_content: sectionsContent,
@@ -163,13 +165,13 @@ export async function POST(
     })
 
     // Increment reports used
-    await supabase
+    await admin
       .from('organizations')
       .update({ reports_used_this_year: (organization.reports_used_this_year || 0) + 1 })
       .eq('id', report.org_id)
 
     // Log AI usage
-    await supabase.from('ai_usage_log').insert({
+    await admin.from('ai_usage_log').insert({
       org_id: report.org_id,
       report_id: reportId,
       user_id: user.id,
@@ -185,7 +187,7 @@ export async function POST(
       metadata: result.metadata,
     })
   } catch (err) {
-    await supabase.from('reports').update({ status: 'draft' }).eq('id', reportId)
+    await admin.from('reports').update({ status: 'draft' }).eq('id', reportId)
     return NextResponse.json(
       { error: (err as Error).message || 'Generering misslyckades' },
       { status: 500 }

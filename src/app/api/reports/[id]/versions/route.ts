@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 // GET - list versions
 export async function GET(
@@ -16,8 +17,10 @@ export async function GET(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Get report to check org membership
-  const { data: report } = await supabase
+  const { data: report } = await admin
     .from('reports')
     .select('org_id')
     .eq('id', reportId)
@@ -27,7 +30,7 @@ export async function GET(
     return NextResponse.json({ error: 'Rapport hittades inte' }, { status: 404 })
   }
 
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -38,7 +41,7 @@ export async function GET(
     return NextResponse.json({ error: 'Inte behörig' }, { status: 403 })
   }
 
-  const { data: versions } = await supabase
+  const { data: versions } = await admin
     .from('report_versions')
     .select('id, version_number, created_at, created_by')
     .eq('report_id', reportId)
@@ -62,7 +65,9 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
-  const { data: report } = await supabase
+  const admin = getSupabaseAdmin()
+
+  const { data: report } = await admin
     .from('reports')
     .select('*')
     .eq('id', reportId)
@@ -72,7 +77,7 @@ export async function POST(
     return NextResponse.json({ error: 'Rapport hittades inte' }, { status: 404 })
   }
 
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -84,7 +89,7 @@ export async function POST(
   }
 
   // Get latest version number
-  const { data: latest } = await supabase
+  const { data: latest } = await admin
     .from('report_versions')
     .select('version_number')
     .eq('report_id', reportId)
@@ -94,7 +99,7 @@ export async function POST(
 
   const nextVersion = (latest?.version_number || 0) + 1
 
-  const { data: version, error } = await supabase
+  const { data: version, error } = await admin
     .from('report_versions')
     .insert({
       report_id: reportId,

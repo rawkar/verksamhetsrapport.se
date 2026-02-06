@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { canExportPDF } from '@/lib/subscription-guard'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { ReportPDF } from '@/lib/pdf/report-pdf'
@@ -20,11 +21,13 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   const body = await request.json()
   const format = (body.format as string) || 'pdf'
 
   // Get report
-  const { data: report } = await supabase
+  const { data: report } = await admin
     .from('reports')
     .select('*')
     .eq('id', reportId)
@@ -39,7 +42,7 @@ export async function POST(
   }
 
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', report.org_id)
@@ -51,7 +54,7 @@ export async function POST(
   }
 
   // Get org
-  const { data: org } = await supabase
+  const { data: org } = await admin
     .from('organizations')
     .select('name, subscription_plan')
     .eq('id', report.org_id)
@@ -81,7 +84,7 @@ export async function POST(
     // Get template sections for TOC
     let sections: { title: string; level: number }[] = []
     if (report.template_id) {
-      const { data: template } = await supabase
+      const { data: template } = await admin
         .from('report_templates')
         .select('sections')
         .eq('id', report.template_id)

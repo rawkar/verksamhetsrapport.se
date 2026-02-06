@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { createReportSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -17,6 +18,8 @@ export async function GET(request: Request) {
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
 
@@ -28,7 +31,7 @@ export async function GET(request: Request) {
   }
 
   // Kontrollera membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -42,7 +45,7 @@ export async function GET(request: Request) {
     )
   }
 
-  const { data: reports, error } = await supabase
+  const { data: reports, error } = await admin
     .from('reports')
     .select('id, title, report_year, report_period, status, created_at, updated_at, template_id, created_by')
     .eq('org_id', orgId)
@@ -73,6 +76,8 @@ export async function POST(request: Request) {
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   const body = await request.json()
   const { org_id, ...reportData } = body
 
@@ -84,7 +89,7 @@ export async function POST(request: Request) {
   }
 
   // Kontrollera membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -114,7 +119,7 @@ export async function POST(request: Request) {
   }
 
   // Hämta mallen för att initiera tomma sektioner
-  const { data: template } = await supabase
+  const { data: template } = await admin
     .from('report_templates')
     .select('sections')
     .eq('id', result.data.template_id)
@@ -129,7 +134,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: report, error } = await supabase
+  const { data: report, error } = await admin
     .from('reports')
     .insert({
       ...result.data,

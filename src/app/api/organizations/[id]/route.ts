@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { updateOrgSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -21,8 +22,10 @@ export async function GET(
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   // Kontrollera membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -36,7 +39,7 @@ export async function GET(
     )
   }
 
-  const { data: org, error } = await supabase
+  const { data: org, error } = await admin
     .from('organizations')
     .select('*')
     .eq('id', id)
@@ -71,8 +74,10 @@ export async function PATCH(
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   // Kontrollera att användaren är owner eller admin
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -102,7 +107,7 @@ export async function PATCH(
     )
   }
 
-  const { data: org, error } = await supabase
+  const { data: org, error } = await admin
     .from('organizations')
     .update({ ...result.data, updated_at: new Date().toISOString() })
     .eq('id', id)

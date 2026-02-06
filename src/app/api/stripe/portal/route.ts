@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getStripe } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
@@ -12,6 +13,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   const body = await request.json()
   const { org_id } = body as { org_id: string }
 
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'org_id krävs' }, { status: 400 })
   }
 
-  const { data: org } = await supabase
+  const { data: org } = await admin
     .from('organizations')
     .select('stripe_customer_id')
     .eq('id', org_id)

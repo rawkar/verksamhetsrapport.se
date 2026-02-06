@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { updateTemplateSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -21,7 +22,9 @@ export async function GET(
     )
   }
 
-  const { data: template, error } = await supabase
+  const admin = getSupabaseAdmin()
+
+  const { data: template, error } = await admin
     .from('report_templates')
     .select('*')
     .eq('id', id)
@@ -36,7 +39,7 @@ export async function GET(
 
   // Kontrollera åtkomst: globala mallar kan alla se, org-mallar kräver membership
   if (!template.is_global && template.org_id) {
-    const { data: membership } = await supabase
+    const { data: membership } = await admin
       .from('org_members')
       .select('role')
       .eq('user_id', user.id)
@@ -73,8 +76,10 @@ export async function PATCH(
     )
   }
 
+  const admin = getSupabaseAdmin()
+
   // Hämta mallen först
-  const { data: existing } = await supabase
+  const { data: existing } = await admin
     .from('report_templates')
     .select('*')
     .eq('id', id)
@@ -97,7 +102,7 @@ export async function PATCH(
 
   // Kontrollera membership
   if (existing.org_id) {
-    const { data: membership } = await supabase
+    const { data: membership } = await admin
       .from('org_members')
       .select('role')
       .eq('user_id', user.id)
@@ -128,7 +133,7 @@ export async function PATCH(
     )
   }
 
-  const { data: template, error } = await supabase
+  const { data: template, error } = await admin
     .from('report_templates')
     .update({ ...result.data, updated_at: new Date().toISOString() })
     .eq('id', id)
@@ -164,7 +169,9 @@ export async function DELETE(
     )
   }
 
-  const { data: existing } = await supabase
+  const admin = getSupabaseAdmin()
+
+  const { data: existing } = await admin
     .from('report_templates')
     .select('org_id, is_global')
     .eq('id', id)
@@ -185,7 +192,7 @@ export async function DELETE(
   }
 
   if (existing.org_id) {
-    const { data: membership } = await supabase
+    const { data: membership } = await admin
       .from('org_members')
       .select('role')
       .eq('user_id', user.id)
@@ -200,7 +207,7 @@ export async function DELETE(
     }
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('report_templates')
     .delete()
     .eq('id', id)

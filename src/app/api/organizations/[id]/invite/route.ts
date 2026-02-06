@@ -16,8 +16,10 @@ export async function POST(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Check admin/owner
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', orgId)
@@ -34,8 +36,6 @@ export async function POST(
   if (!email?.trim()) {
     return NextResponse.json({ error: 'Email krävs' }, { status: 400 })
   }
-
-  const admin = getSupabaseAdmin()
 
   // Check if user exists
   const { data: profile } = await admin

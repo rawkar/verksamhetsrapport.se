@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET(
   _request: NextRequest,
@@ -15,8 +16,10 @@ export async function GET(
     return NextResponse.json({ error: 'Ej autentiserad' }, { status: 401 })
   }
 
+  const admin = getSupabaseAdmin()
+
   // Check membership
-  const { data: member } = await supabase
+  const { data: member } = await admin
     .from('org_members')
     .select('role')
     .eq('org_id', orgId)
@@ -27,7 +30,7 @@ export async function GET(
     return NextResponse.json({ error: 'Inte behörig' }, { status: 403 })
   }
 
-  const { data: members } = await supabase
+  const { data: members } = await admin
     .from('org_members')
     .select('id, user_id, role, profiles(full_name, email)')
     .eq('org_id', orgId)
