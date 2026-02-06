@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Copy, Check, FileDown, Download, Loader2 } from 'lucide-react'
+import Markdown from 'react-markdown'
 import ReportMetadata from './ReportMetadata'
 import type { GenerationMetadata } from '@/types/database'
 
@@ -12,6 +13,12 @@ interface ReportOutputProps {
   canExportPDF?: boolean
 }
 
+function cleanContent(raw: string): string {
+  return raw
+    .replace(/^---+$/gm, '') // Remove horizontal rules
+    .replace(/\n{3,}/g, '\n\n') // Collapse excess blank lines
+}
+
 export default function ReportOutput({
   reportId,
   content,
@@ -20,6 +27,7 @@ export default function ReportOutput({
 }: ReportOutputProps) {
   const [copied, setCopied] = useState(false)
   const [exporting, setExporting] = useState<string | null>(null)
+  const reportRef = useRef<HTMLDivElement>(null)
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content)
@@ -57,13 +65,13 @@ export default function ReportOutput({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={reportRef} id="generated-report">
       {/* Metadata */}
       {metadata && <ReportMetadata metadata={metadata} />}
 
       {/* Output */}
       <div className="card p-0 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
           <h3 className="font-medium">Genererad rapport</h3>
           <div className="flex items-center gap-2">
             {canExportPDF && (
@@ -113,8 +121,44 @@ export default function ReportOutput({
             </button>
           </div>
         </div>
-        <div className="p-6 prose prose-sm max-w-none whitespace-pre-wrap">
-          {content}
+        <div className="report-rendered">
+          <Markdown
+            components={{
+              h1: ({ children }) => (
+                <h1 className="report-h1">{children}</h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="report-h2">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="report-h3">{children}</h3>
+              ),
+              h4: ({ children }) => (
+                <h4 className="report-h4">{children}</h4>
+              ),
+              p: ({ children }) => (
+                <p className="report-p">{children}</p>
+              ),
+              ul: ({ children }) => (
+                <ul className="report-ul">{children}</ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="report-ol">{children}</ol>
+              ),
+              li: ({ children }) => (
+                <li className="report-li">{children}</li>
+              ),
+              strong: ({ children }) => (
+                <strong className="font-semibold">{children}</strong>
+              ),
+              em: ({ children }) => (
+                <em className="italic">{children}</em>
+              ),
+              hr: () => null,
+            }}
+          >
+            {cleanContent(content)}
+          </Markdown>
         </div>
       </div>
     </div>

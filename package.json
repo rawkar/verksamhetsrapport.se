@@ -26,6 +26,7 @@
     "pdf-parse": "^2.2.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
     "sortablejs": "^1.15.6",
     "stripe": "^20.3.1",
     "tiktoken": "^1.0.22",

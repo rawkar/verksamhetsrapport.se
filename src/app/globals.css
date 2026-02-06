@@ -341,3 +341,86 @@ h1, h2, h3, h4, h5, h6 {
 .animate-slideUp {
   animation: slideUp 0.3s ease;
 }
+
+/* ============================================
+   REPORT RENDERED OUTPUT
+   ============================================ */
+
+.report-rendered {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.7;
+  color: var(--foreground-secondary);
+}
+
+.report-h1 {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--trs-logo-blue);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.report-h2 {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--trs-logo-blue);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--trs-main-6);
+  line-height: 1.3;
+}
+
+.report-h3 {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--trs-main-3);
+  line-height: 1.4;
+}
+
+.report-h4 {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.report-p {
+  margin-bottom: 1em;
+  line-height: 1.7;
+}
+
+.report-ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1em;
+}
+
+.report-ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1em;
+}
+
+.report-li {
+  margin-bottom: 0.35em;
+  line-height: 1.6;
+}
+
+.report-rendered > :first-child {
+  margin-top: 0;
+}
