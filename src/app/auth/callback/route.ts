@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -42,8 +43,9 @@ export async function GET(request: NextRequest) {
       } = await supabase.auth.getUser()
 
       if (user) {
-        // Kolla om användaren är medlem i någon organisation
-        const { data: memberships } = await supabase
+        // Kolla om användaren är medlem i någon organisation (admin för att undvika RLS)
+        const admin = getSupabaseAdmin()
+        const { data: memberships } = await admin
           .from('org_members')
           .select('org_id')
           .eq('user_id', user.id)

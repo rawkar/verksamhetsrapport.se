@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { createOrgSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -17,7 +18,10 @@ export async function GET() {
     )
   }
 
-  const { data: memberships, error: memberError } = await supabase
+  // Använd admin-klienten för att undvika RLS-problem
+  const admin = getSupabaseAdmin()
+
+  const { data: memberships, error: memberError } = await admin
     .from('org_members')
     .select('org_id, role')
     .eq('user_id', user.id)
@@ -34,7 +38,7 @@ export async function GET() {
   }
 
   const orgIds = memberships.map((m) => m.org_id)
-  const { data: organizations, error: orgError } = await supabase
+  const { data: organizations, error: orgError } = await admin
     .from('organizations')
     .select('*')
     .in('id', orgIds)
@@ -97,8 +101,11 @@ export async function POST(request: Request) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 
+  // Använd admin-klienten för att kringgå RLS
+  const admin = getSupabaseAdmin()
+
   // Kontrollera att slug är unik
-  const { data: existing } = await supabase
+  const { data: existing } = await admin
     .from('organizations')
     .select('id')
     .eq('slug', slug)
@@ -110,7 +117,7 @@ export async function POST(request: Request) {
       : slug
 
   // Skapa organisation
-  const { data: org, error: orgError } = await supabase
+  const { data: org, error: orgError } = await admin
     .from('organizations')
     .insert({
       name,
@@ -131,7 +138,7 @@ export async function POST(request: Request) {
   }
 
   // Lägg till användaren som owner
-  const { error: memberError } = await supabase.from('org_members').insert({
+  const { error: memberError } = await admin.from('org_members').insert({
     user_id: user.id,
     org_id: org.id,
     role: 'owner',
@@ -139,7 +146,7 @@ export async function POST(request: Request) {
 
   if (memberError) {
     // Rulla tillbaka organisationen om membership misslyckas
-    await supabase.from('organizations').delete().eq('id', org.id)
+    await admin.from('organizations').delete().eq('id', org.id)
     return NextResponse.json(
       { error: { code: 'DB_ERROR', message: memberError.message } },
       { status: 500 }
