@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { createTemplateSchema } from '@/lib/validations'
 import { NextResponse } from 'next/server'
 
@@ -17,11 +18,12 @@ export async function GET(request: Request) {
     )
   }
 
+  const admin = getSupabaseAdmin()
   const { searchParams } = new URL(request.url)
   const orgId = searchParams.get('org_id')
 
   // Hämta globala mallar
-  let query = supabase
+  let query = admin
     .from('report_templates')
     .select('*')
     .order('created_at', { ascending: true })
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
     )
   }
 
+  const admin = getSupabaseAdmin()
   const body = await request.json()
   const { org_id, ...templateData } = body
 
@@ -72,7 +75,7 @@ export async function POST(request: Request) {
   }
 
   // Kontrollera membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('org_members')
     .select('role')
     .eq('user_id', user.id)
@@ -101,7 +104,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { data: template, error } = await supabase
+  const { data: template, error } = await admin
     .from('report_templates')
     .insert({
       ...result.data,
