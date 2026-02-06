@@ -1,106 +1,6 @@
-import React from 'react'
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from '@react-pdf/renderer'
+import { jsPDF } from 'jspdf'
 
-const styles = StyleSheet.create({
-  page: {
-    fontFamily: 'Helvetica',
-    fontSize: 10,
-    paddingTop: 60,
-    paddingBottom: 50,
-    paddingHorizontal: 50,
-    color: '#1a1a1a',
-  },
-  coverPage: {
-    fontFamily: 'Helvetica',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    paddingHorizontal: 50,
-  },
-  coverTitle: {
-    fontSize: 28,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    marginBottom: 12,
-    color: '#0065A3',
-  },
-  coverSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 8,
-  },
-  coverOrg: {
-    fontSize: 16,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    marginTop: 30,
-    color: '#333',
-  },
-  coverDate: {
-    fontSize: 11,
-    textAlign: 'center',
-    color: '#999',
-    marginTop: 8,
-  },
-  tocTitle: {
-    fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 20,
-    color: '#0065A3',
-  },
-  tocItem: {
-    fontSize: 11,
-    marginBottom: 6,
-    color: '#333',
-  },
-  tocSubItem: {
-    fontSize: 10,
-    marginBottom: 4,
-    paddingLeft: 15,
-    color: '#666',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: 'Helvetica-Bold',
-    marginTop: 20,
-    marginBottom: 8,
-    color: '#0065A3',
-  },
-  subsectionTitle: {
-    fontSize: 13,
-    fontFamily: 'Helvetica-Bold',
-    marginTop: 14,
-    marginBottom: 6,
-    color: '#333',
-  },
-  paragraph: {
-    fontSize: 10,
-    lineHeight: 1.6,
-    marginBottom: 8,
-    textAlign: 'justify',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 25,
-    left: 50,
-    right: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    fontSize: 8,
-    color: '#999',
-  },
-})
-
-interface ReportPDFProps {
+interface ReportPDFOptions {
   title: string
   orgName: string
   year?: number | null
@@ -109,83 +9,158 @@ interface ReportPDFProps {
   sections?: { title: string; level: number }[]
 }
 
-export function ReportPDF({
-  title,
-  orgName,
-  year,
-  period,
-  content,
-  sections,
-}: ReportPDFProps) {
+const COLORS = {
+  primary: [0, 101, 163] as [number, number, number],
+  dark: [26, 26, 26] as [number, number, number],
+  gray: [102, 102, 102] as [number, number, number],
+  lightGray: [153, 153, 153] as [number, number, number],
+}
+
+const PAGE = {
+  width: 210,
+  height: 297,
+  marginX: 25,
+  marginTop: 30,
+  marginBottom: 25,
+}
+
+const CONTENT_WIDTH = PAGE.width - PAGE.marginX * 2
+
+export function generatePDFBuffer(options: ReportPDFOptions): ArrayBuffer {
+  const { title, orgName, year, period, content, sections } = options
+
   const periodLabel = period
     ? { annual: 'Helår', h1: 'Halvår 1', h2: 'Halvår 2', q1: 'Q1', q2: 'Q2', q3: 'Q3', q4: 'Q4' }[period] || period
     : ''
 
-  // Split content into paragraphs
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+
+  // --- Cover page ---
+  const centerY = PAGE.height / 2 - 30
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(28)
+  doc.setTextColor(...COLORS.primary)
+  doc.text(title, PAGE.width / 2, centerY, { align: 'center', maxWidth: CONTENT_WIDTH })
+
+  const titleLines = doc.splitTextToSize(title, CONTENT_WIDTH)
+  let y = centerY + titleLines.length * 12
+
+  if (year) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(14)
+    doc.setTextColor(...COLORS.gray)
+    const subtitle = periodLabel ? `${periodLabel} ${year}` : `${year}`
+    doc.text(subtitle, PAGE.width / 2, y, { align: 'center' })
+    y += 10
+  }
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(16)
+  doc.setTextColor(...COLORS.dark)
+  doc.text(orgName, PAGE.width / 2, y + 15, { align: 'center' })
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(11)
+  doc.setTextColor(...COLORS.lightGray)
+  const dateStr = new Date().toLocaleDateString('sv-SE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  doc.text(dateStr, PAGE.width / 2, y + 25, { align: 'center' })
+
+  // --- Table of contents ---
+  if (sections && sections.length > 0) {
+    doc.addPage()
+    y = PAGE.marginTop
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(18)
+    doc.setTextColor(...COLORS.primary)
+    doc.text('Innehållsförteckning', PAGE.marginX, y)
+    y += 12
+
+    for (const s of sections) {
+      doc.setFontSize(s.level === 1 ? 11 : 10)
+      doc.setFont('helvetica', s.level === 1 ? 'bold' : 'normal')
+      doc.setTextColor(s.level === 1 ? COLORS.dark[0] : COLORS.gray[0], s.level === 1 ? COLORS.dark[1] : COLORS.gray[1], s.level === 1 ? COLORS.dark[2] : COLORS.gray[2])
+      const indent = s.level === 1 ? 0 : 8
+      doc.text(s.title, PAGE.marginX + indent, y)
+      y += s.level === 1 ? 7 : 5
+    }
+
+    addFooter(doc, orgName)
+  }
+
+  // --- Content pages ---
+  doc.addPage()
+  y = PAGE.marginTop
+
   const paragraphs = content.split('\n').filter((p) => p.trim())
 
-  return (
-    <Document>
-      {/* Cover page */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.coverPage}>
-          <Text style={styles.coverTitle}>{title}</Text>
-          {year && (
-            <Text style={styles.coverSubtitle}>
-              {periodLabel ? `${periodLabel} ${year}` : `${year}`}
-            </Text>
-          )}
-          <Text style={styles.coverOrg}>{orgName}</Text>
-          <Text style={styles.coverDate}>
-            {new Date().toLocaleDateString('sv-SE', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </Text>
-        </View>
-      </Page>
+  for (const p of paragraphs) {
+    const trimmed = p.trim()
+    const isMainHeading = /^(\d+\.?\s+)?[A-ZÅÄÖ]/.test(trimmed) && trimmed.length < 80 && !trimmed.endsWith('.')
+    const isSubHeading = /^\s*(\d+\.\d+|[-–•])/.test(trimmed) && trimmed.length < 80
 
-      {/* Table of contents */}
-      {sections && sections.length > 0 && (
-        <Page size="A4" style={styles.page}>
-          <Text style={styles.tocTitle}>Innehållsförteckning</Text>
-          {sections.map((s, i) => (
-            <Text
-              key={i}
-              style={s.level === 1 ? styles.tocItem : styles.tocSubItem}
-            >
-              {s.title}
-            </Text>
-          ))}
-          <View style={styles.footer}>
-            <Text>{orgName}</Text>
-            <Text>Skapad med verksamhetsrapport.se</Text>
-          </View>
-        </Page>
-      )}
+    if (isMainHeading && !isSubHeading) {
+      // Check if we need a new page (heading shouldn't be at bottom)
+      if (y > PAGE.height - 50) {
+        addFooter(doc, orgName)
+        doc.addPage()
+        y = PAGE.marginTop
+      }
 
-      {/* Content */}
-      <Page size="A4" style={styles.page}>
-        {paragraphs.map((p, i) => {
-          const trimmed = p.trim()
-          // Detect headings (lines that are short and possibly numbered)
-          const isMainHeading = /^(\d+\.?\s+)?[A-ZÅÄÖ]/.test(trimmed) && trimmed.length < 80 && !trimmed.endsWith('.')
-          const isSubHeading = /^\s*(\d+\.\d+|[-–•])/.test(trimmed) && trimmed.length < 80
+      y += 6
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.setTextColor(...COLORS.primary)
+      doc.text(trimmed, PAGE.marginX, y)
+      y += 8
+    } else if (isSubHeading) {
+      if (y > PAGE.height - 40) {
+        addFooter(doc, orgName)
+        doc.addPage()
+        y = PAGE.marginTop
+      }
 
-          if (isMainHeading && !isSubHeading) {
-            return <Text key={i} style={styles.sectionTitle}>{trimmed}</Text>
-          }
-          if (isSubHeading) {
-            return <Text key={i} style={styles.subsectionTitle}>{trimmed}</Text>
-          }
-          return <Text key={i} style={styles.paragraph}>{trimmed}</Text>
-        })}
-        <View style={styles.footer} fixed>
-          <Text>{orgName}</Text>
-          <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
-        </View>
-      </Page>
-    </Document>
-  )
+      y += 4
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(...COLORS.dark)
+      doc.text(trimmed, PAGE.marginX, y)
+      y += 6
+    } else {
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(...COLORS.dark)
+
+      const lines = doc.splitTextToSize(trimmed, CONTENT_WIDTH)
+
+      for (const line of lines) {
+        if (y > PAGE.height - PAGE.marginBottom - 5) {
+          addFooter(doc, orgName)
+          doc.addPage()
+          y = PAGE.marginTop
+        }
+        doc.text(line, PAGE.marginX, y)
+        y += 4.5
+      }
+      y += 3 // paragraph spacing
+    }
+  }
+
+  addFooter(doc, orgName)
+
+  return doc.output('arraybuffer')
+}
+
+function addFooter(doc: jsPDF, orgName: string) {
+  const pageCount = doc.getNumberOfPages()
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.setTextColor(...COLORS.lightGray)
+  doc.text(orgName, PAGE.marginX, PAGE.height - 10)
+  doc.text(`${pageCount}`, PAGE.width - PAGE.marginX, PAGE.height - 10, { align: 'right' })
 }

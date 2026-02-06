@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { renderToBuffer } from '@react-pdf/renderer'
-import { ReportPDF } from '@/lib/pdf/report-pdf'
-import React from 'react'
+import { generatePDFBuffer } from '@/lib/pdf/report-pdf'
 import type { TemplateSection } from '@/types/database'
-
-export const runtime = 'nodejs'
 
 export async function POST(
   request: NextRequest,
@@ -93,19 +89,16 @@ export async function POST(
     }
 
     try {
-      const pdfBuffer = await renderToBuffer(
-        React.createElement(ReportPDF, {
-          title: report.title,
-          orgName: org.name,
-          year: report.report_year,
-          period: report.report_period,
-          content: report.generated_content as string,
-          sections,
-        })
-      )
+      const pdfBuffer = generatePDFBuffer({
+        title: report.title,
+        orgName: org.name,
+        year: report.report_year,
+        period: report.report_period,
+        content: report.generated_content as string,
+        sections,
+      })
 
-      const uint8 = new Uint8Array(pdfBuffer)
-      return new NextResponse(uint8, {
+      return new NextResponse(new Uint8Array(pdfBuffer), {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="${report.title}.pdf"`,
