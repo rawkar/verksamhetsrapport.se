@@ -5,10 +5,10 @@
 > **Produktnamn:** Verksamhetsrapport.se
 >
 > **Domän:** verksamhetsrapport.se
-> **Supabase-projekt:** `thhiewxmaskywgffizps`
-> **Supabase URL:** `https://thhiewxmaskywgffizps.supabase.co`
-> **Supabase Dashboard:** https://supabase.com/dashboard/project/thhiewxmaskywgffizps
-> **Databas:** `postgresql://postgres:[YOUR-PASSWORD]@db.thhiewxmaskywgffizps.supabase.co:5432/postgres`
+> **Supabase-projekt:** Se `.env.local`
+> **Supabase URL:** Se `.env.local`
+> **Supabase Dashboard:** Se `.env.local`
+> **Databas:** Se `.env.local`
 >
 > **Denna fil är din kompletta instruktionsmanual för Claude Code.** Varje fas, uppgift och fil är beskriven med tillräcklig detalj för att kunna implementeras steg för steg.
 
@@ -552,10 +552,10 @@ npm install -D @types/sortablejs
 # ============================================
 # SUPABASE
 # ============================================
-NEXT_PUBLIC_SUPABASE_URL=https://thhiewxmaskywgffizps.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_zQziHWoLZ3OIFQs4_uOmVA_-30EbI4-
-SUPABASE_SERVICE_ROLE_KEY=<hämta från Supabase Dashboard → Settings → API → service_role>
-DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.thhiewxmaskywgffizps.supabase.co:5432/postgres
+NEXT_PUBLIC_SUPABASE_URL=<din Supabase URL>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<din Supabase anon key>
+SUPABASE_SERVICE_ROLE_KEY=<din Supabase service role key>
+DATABASE_URL=<din PostgreSQL connection string>
 
 # ============================================
 # AI
@@ -598,8 +598,8 @@ export function createClient() {
 
 **`src/lib/supabase/server.ts`** – Serverklient (för API routes och Server Components)
 
-> **Supabase-projekt:** `thhiewxmaskywgffizps` (region: EU)
-> **Dashboard:** https://supabase.com/dashboard/project/thhiewxmaskywgffizps
+> **Supabase-projekt:** Se `.env.local`
+> **Dashboard:** Se `.env.local`
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
@@ -1847,7 +1847,7 @@ Använd dessa kommandon som referens under utvecklingen:
 npm run dev
 
 # Generera Supabase-typer (efter schemaändringar)
-npx supabase gen types typescript --project-id thhiewxmaskywgffizps > src/types/database.ts
+npx supabase gen types typescript --project-id <SUPABASE_PROJECT_ID> > src/types/database.ts
 
 # Lägg till shadcn/ui-komponenter
 npx shadcn-ui@latest add button input textarea card dialog dropdown-menu badge progress toast tabs select
