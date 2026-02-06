@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { generatePDFBuffer } from '@/lib/pdf/report-pdf'
+import { generateDocxBuffer } from '@/lib/export/report-docx'
 import type { TemplateSection } from '@/types/database'
 
 export async function POST(
@@ -61,42 +62,54 @@ export async function POST(
     return NextResponse.json({ error: 'Organisation saknas' }, { status: 400 })
   }
 
-  if (format === 'txt') {
-    return new NextResponse(report.generated_content, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Content-Disposition': `attachment; filename="${report.title}.txt"`,
-      },
-    })
+  // Get template sections for TOC (used by both PDF and DOCX)
+  let sections: { title: string; level: number }[] = []
+  if (report.template_id) {
+    const { data: template } = await admin
+      .from('report_templates')
+      .select('sections')
+      .eq('id', report.template_id)
+      .single()
+
+    if (template?.sections) {
+      sections = (template.sections as TemplateSection[]).map((s) => ({
+        title: s.title,
+        level: s.level,
+      }))
+    }
+  }
+
+  const exportOptions = {
+    title: report.title,
+    orgName: org.name,
+    year: report.report_year,
+    period: report.report_period,
+    content: report.generated_content as string,
+    sections,
+  }
+
+  if (format === 'docx') {
+    try {
+      const docxBuffer = await generateDocxBuffer(exportOptions)
+
+      return new NextResponse(new Uint8Array(docxBuffer), {
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Disposition': `attachment; filename="${report.title}.docx"`,
+        },
+      })
+    } catch (err) {
+      console.error('DOCX generation error:', err)
+      return NextResponse.json(
+        { error: 'Word-generering misslyckades: ' + (err as Error).message },
+        { status: 500 }
+      )
+    }
   }
 
   if (format === 'pdf') {
-    // Get template sections for TOC
-    let sections: { title: string; level: number }[] = []
-    if (report.template_id) {
-      const { data: template } = await admin
-        .from('report_templates')
-        .select('sections')
-        .eq('id', report.template_id)
-        .single()
-
-      if (template?.sections) {
-        sections = (template.sections as TemplateSection[]).map((s) => ({
-          title: s.title,
-          level: s.level,
-        }))
-      }
-    }
-
     try {
-      const pdfBuffer = generatePDFBuffer({
-        title: report.title,
-        orgName: org.name,
-        year: report.report_year,
-        period: report.report_period,
-        content: report.generated_content as string,
-        sections,
-      })
+      const pdfBuffer = generatePDFBuffer(exportOptions)
 
       return new NextResponse(new Uint8Array(pdfBuffer), {
         headers: {

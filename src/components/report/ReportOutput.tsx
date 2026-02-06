@@ -35,7 +35,7 @@ export default function ReportOutput({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleExport = async (format: 'pdf' | 'txt') => {
+  const handleExport = async (format: 'pdf' | 'docx') => {
     setExporting(format)
     try {
       const res = await fetch(`/api/reports/${reportId}/export`, {
@@ -91,16 +91,16 @@ export default function ReportOutput({
             )}
             <button
               type="button"
-              onClick={() => handleExport('txt')}
+              onClick={() => handleExport('docx')}
               disabled={exporting !== null}
               className="btn btn-secondary py-1.5 px-3 text-sm"
             >
-              {exporting === 'txt' ? (
+              {exporting === 'docx' ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Download className="w-3.5 h-3.5" />
               )}
-              TXT
+              Word
             </button>
             <button
               type="button"
