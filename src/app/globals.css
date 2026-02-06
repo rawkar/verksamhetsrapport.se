@@ -1,0 +1,343 @@
+@import "tailwindcss";
+
+/* ============================================
+   VERKSAMHETSRAPPORT.SE - GLOBAL STYLES
+   Baserat på TRS Brand Colors
+   ============================================ */
+
+:root {
+  /* TRS Logo Colors */
+  --trs-logo-blue: #184b65;
+  --trs-logo-orange: #d16b1c;
+
+  /* TRS Main Colors */
+  --trs-main-1: #1e6582;
+  --trs-main-2: #4d87a2;
+  --trs-main-3: #6ba9c3;
+  --trs-main-4: #337687;
+  --trs-main-5: #30919a;
+  --trs-main-6: #9ecbc9;
+
+  /* TRS Contrasting Colors */
+  --trs-red: #ff2b0f;
+  --trs-magenta: #b1418c;
+
+  /* Semantic Colors */
+  --color-primary: var(--trs-logo-blue);
+  --color-primary-hover: var(--trs-main-1);
+  --color-secondary: var(--trs-main-2);
+  --color-secondary-hover: var(--trs-main-3);
+  --color-accent: var(--trs-logo-orange);
+  --color-accent-hover: #e07a2c;
+  --color-success: var(--trs-main-5);
+  --color-warning: #f59e0b;
+  --color-error: var(--trs-red);
+  --color-info: var(--trs-main-3);
+
+  /* Background & Foreground */
+  --background: #ffffff;
+  --background-secondary: #f8fafc;
+  --background-tertiary: #f1f5f9;
+  --foreground: var(--trs-logo-blue);
+  --foreground-secondary: #475569;
+  --foreground-muted: #64748b;
+
+  /* Border */
+  --border: var(--trs-main-6);
+  --border-hover: var(--trs-main-3);
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(24, 75, 101, 0.05);
+  --shadow: 0 2px 10px rgba(24, 75, 101, 0.15);
+  --shadow-lg: 0 10px 25px rgba(24, 75, 101, 0.2);
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-bg: var(--trs-logo-blue);
+  --sidebar-text: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-active: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode support (kan aktiveras senare) */
+@media (prefers-color-scheme: dark) {
+  :root.dark {
+    --background: #0f172a;
+    --background-secondary: #1e293b;
+    --background-tertiary: #334155;
+    --foreground: #f1f5f9;
+    --foreground-secondary: #cbd5e1;
+    --foreground-muted: #94a3b8;
+    --border: #334155;
+    --border-hover: #475569;
+  }
+}
+
+/* Tailwind theme integration */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  /* TRS Colors for Tailwind */
+  --color-trs-blue: var(--trs-logo-blue);
+  --color-trs-orange: var(--trs-logo-orange);
+  --color-trs-main-1: var(--trs-main-1);
+  --color-trs-main-2: var(--trs-main-2);
+  --color-trs-main-3: var(--trs-main-3);
+  --color-trs-main-4: var(--trs-main-4);
+  --color-trs-main-5: var(--trs-main-5);
+  --color-trs-main-6: var(--trs-main-6);
+
+  /* Semantic colors for Tailwind */
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+}
+
+/* Base styles */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings use TRS style (Arial/sans-serif) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* Body text for reports uses Georgia (as per TRS) */
+.prose, .report-content {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--trs-main-3);
+  color: white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--trs-main-6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--trs-main-3);
+}
+
+/* Utility classes */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--trs-logo-blue), var(--trs-main-2));
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--trs-logo-orange), #e07a2c);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Card styling */
+.card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow);
+}
+
+/* Button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--background-secondary);
+  border-color: var(--border-hover);
+}
+
+.btn-accent {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-accent:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Input styling */
+.input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(24, 75, 101, 0.1);
+}
+
+.input::placeholder {
+  color: var(--foreground-muted);
+}
+
+/* Textarea styling */
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.875rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.7;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(24, 75, 101, 0.1);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.badge-primary {
+  background: rgba(24, 75, 101, 0.1);
+  color: var(--color-primary);
+}
+
+.badge-success {
+  background: rgba(48, 145, 154, 0.1);
+  color: var(--color-success);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.badge-error {
+  background: rgba(255, 43, 15, 0.1);
+  color: var(--color-error);
+}
+
+/* Loading spinner */
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease;
+}
