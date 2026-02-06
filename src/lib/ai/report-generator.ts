@@ -68,7 +68,7 @@ export async function generateReport(params: {
   const completionOptions = {
     model,
     maxTokens: 16000,
-    temperature: 0.7,
+    temperature: 0.4,
   }
 
   if (totalInputTokens <= MAX_SAFE_INPUT_TOKENS) {

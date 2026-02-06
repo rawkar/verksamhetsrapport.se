@@ -5,21 +5,11 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from '@react-pdf/renderer'
-
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hjQ.woff2', fontWeight: 600 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYAZ9hjQ.woff2', fontWeight: 700 },
-  ],
-})
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     fontSize: 10,
     paddingTop: 60,
     paddingBottom: 50,
@@ -27,7 +17,7 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
   },
   coverPage: {
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -37,7 +27,7 @@ const styles = StyleSheet.create({
   },
   coverTitle: {
     fontSize: 28,
-    fontWeight: 700,
+    fontFamily: 'Helvetica-Bold',
     textAlign: 'center',
     marginBottom: 12,
     color: '#0065A3',
@@ -50,7 +40,7 @@ const styles = StyleSheet.create({
   },
   coverOrg: {
     fontSize: 16,
-    fontWeight: 600,
+    fontFamily: 'Helvetica-Bold',
     textAlign: 'center',
     marginTop: 30,
     color: '#333',
@@ -63,7 +53,7 @@ const styles = StyleSheet.create({
   },
   tocTitle: {
     fontSize: 18,
-    fontWeight: 700,
+    fontFamily: 'Helvetica-Bold',
     marginBottom: 20,
     color: '#0065A3',
   },
@@ -80,14 +70,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 700,
+    fontFamily: 'Helvetica-Bold',
     marginTop: 20,
     marginBottom: 8,
     color: '#0065A3',
   },
   subsectionTitle: {
     fontSize: 13,
-    fontWeight: 600,
+    fontFamily: 'Helvetica-Bold',
     marginTop: 14,
     marginBottom: 6,
     color: '#333',

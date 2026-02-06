@@ -9,9 +9,7 @@ export class PromptBuilder {
   }): string {
     const { organization, template, styleProfile, referenceAnalysis } = params
 
-    let prompt = `Du är expert på att skriva professionella verksamhetsrapporter på svenska.
-
-Din uppgift är att omformulera och förbättra språket i underlaget så att det blir enhetligt och professionellt. Du ska ALDRIG korta ner eller sammanfatta innehållet.
+    let prompt = `Du är expert på att skriva verksamhetsrapporter på svenska. Du skriver korrekt, sakligt och naturligt.
 
 ORGANISATION: ${organization.name}
 TYP: ${this.getOrgTypeDescription(organization.org_type)}
@@ -33,14 +31,22 @@ SEKTOR: ${organization.sector || 'Ej specificerad'}
     prompt += `
 
 KRITISKA REGLER:
-- BEHÅLL HELA TEXTLÄNGDEN – varje avsnitt ska bli lika långt eller längre
-- BEVARA ALLA DETALJER, namn, datum, procentsatser och specifika händelser
+- BEVARA ALLA DETALJER – namn, datum, procentsatser, specifika händelser
 - INGA PÅHITT – lägg aldrig till information som inte finns i underlaget
 - KONSISTENS – enhetlig ton och stil genom hela rapporten
 - Skriv i aktiv form med korta, klara meningar
 
+STILREGLER (MYCKET VIKTIGT):
+- VARIERA dina formuleringar. Använd ALDRIG samma övergångsord eller fras mer än 2 gånger i hela rapporten.
+- Undvik helt följande typiska AI-formuleringar: "detta visar på", "detta är ett tydligt tecken", "detta understryker", "sammantaget visar", "det är glädjande", "mycket positiv utveckling", "det är värt att notera"
+- Avsluta INTE varje stycke med en värderande eller sammanfattande mening. Låt fakta tala för sig själva.
+- Var INTE överdrivet positiv. Beskriv saker sakligt. Skriv "ökade med 15 %" – inte "ökade med hela 15 %, vilket är mycket glädjande".
+- Variera meningsbyggnaden. Börja inte varje stycke på samma sätt.
+- Texten ska låta som om en erfaren kommunikatör har skrivit den – inte som en AI.
+- Håll texten koncis. Skriv det som behövs, inte mer. Undvik utfyllnadsmeningar.
+
 OUTPUT-KRAV:
-- Komplett rapport i textformat med FULL detaljnivå
+- Komplett rapport i textformat
 - Alla rubriker och underrubriker ska finnas med
 - Färdig för direkt kopiering till dokumentmall`
 
@@ -58,18 +64,18 @@ OUTPUT-KRAV:
       if (chunkInfo.current === 1) {
         chunkContext += ' Detta är första delen – etablera struktur och ton.'
       } else if (chunkInfo.current === chunkInfo.total) {
-        chunkContext += ' Detta är sista delen – avsluta rapporten professionellt.'
+        chunkContext += ' Detta är sista delen – avsluta rapporten.'
       } else {
-        chunkContext += ' Detta är en mellendel – fortsätt med samma stil och struktur.'
+        chunkContext += ' Fortsätt med samma stil.'
       }
       chunkContext += '\n'
     }
 
-    return `Förbättra språket i följande underlag till en komplett verksamhetsrapport:
+    return `Skriv om följande underlag till en verksamhetsrapport:
 
 ${contentText}
 ${chunkContext}
-VIKTIGT: Omformulera texten ovan med enhetligt, professionellt och samtalsnära språk. Behåll ALLA detaljer, exempel, namn, datum och specifik information. Din output ska vara lika lång eller längre än input. Sammanfatta INTE – förbättra endast språket och strukturen.`
+VIKTIGT: Behåll ALLA detaljer, exempel, namn, datum och specifik information. Förbättra språk och struktur. Skriv sakligt och naturligt – undvik AI-mässiga formuleringar och överdriven positivitet. Variera övergångar och meningsbyggnad.`
   }
 
   private static getOrgTypeDescription(orgType: string): string {

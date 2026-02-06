@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { canExportPDF } from '@/lib/subscription-guard'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { ReportPDF } from '@/lib/pdf/report-pdf'
 import React from 'react'
 import type { TemplateSection } from '@/types/database'
+
+export const runtime = 'nodejs'
 
 export async function POST(
   request: NextRequest,
@@ -74,13 +75,6 @@ export async function POST(
   }
 
   if (format === 'pdf') {
-    if (!canExportPDF(org.subscription_plan)) {
-      return NextResponse.json(
-        { error: 'PDF-export kräver Bas-plan eller högre' },
-        { status: 403 }
-      )
-    }
-
     // Get template sections for TOC
     let sections: { title: string; level: number }[] = []
     if (report.template_id) {
@@ -98,24 +92,32 @@ export async function POST(
       }
     }
 
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(ReportPDF, {
-        title: report.title,
-        orgName: org.name,
-        year: report.report_year,
-        period: report.report_period,
-        content: report.generated_content as string,
-        sections,
-      })
-    )
+    try {
+      const pdfBuffer = await renderToBuffer(
+        React.createElement(ReportPDF, {
+          title: report.title,
+          orgName: org.name,
+          year: report.report_year,
+          period: report.report_period,
+          content: report.generated_content as string,
+          sections,
+        })
+      )
 
-    const uint8 = new Uint8Array(pdfBuffer)
-    return new NextResponse(uint8, {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${report.title}.pdf"`,
-      },
-    })
+      const uint8 = new Uint8Array(pdfBuffer)
+      return new NextResponse(uint8, {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${report.title}.pdf"`,
+        },
+      })
+    } catch (err) {
+      console.error('PDF generation error:', err)
+      return NextResponse.json(
+        { error: 'PDF-generering misslyckades: ' + (err as Error).message },
+        { status: 500 }
+      )
+    }
   }
 
   return NextResponse.json({ error: 'Format stöds inte' }, { status: 400 })

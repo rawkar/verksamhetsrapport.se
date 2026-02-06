@@ -11,7 +11,6 @@ export default function ReportPage() {
   const router = useRouter()
   const [report, setReport] = useState<Report | null>(null)
   const [template, setTemplate] = useState<ReportTemplate | null>(null)
-  const [canExportPDF, setCanExportPDF] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -32,16 +31,6 @@ export default function ReportPage() {
         }
       }
 
-      // Check org plan for PDF export
-      const orgRes = await fetch('/api/organizations')
-      if (orgRes.ok) {
-        const orgData = await orgRes.json()
-        const org = orgData.data?.find((o: { id: string }) => o.id === data.data.org_id)
-        if (org && org.subscription_plan !== 'free') {
-          setCanExportPDF(true)
-        }
-      }
-
       setIsLoading(false)
     }
     load()
@@ -55,5 +44,5 @@ export default function ReportPage() {
     )
   }
 
-  return <ReportEditor report={report} template={template} canExportPDF={canExportPDF} />
+  return <ReportEditor report={report} template={template} canExportPDF />
 }

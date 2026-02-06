@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 const PLAN_LIMITS: Record<string, number> = {
   free: 1,
@@ -12,8 +12,8 @@ export async function checkReportLimit(orgId: string): Promise<{
   remaining: number
   plan: string
 }> {
-  const supabase = await createServerSupabaseClient()
-  const { data: org } = await supabase
+  const admin = getSupabaseAdmin()
+  const { data: org } = await admin
     .from('organizations')
     .select('subscription_plan, reports_used_this_year')
     .eq('id', orgId)
