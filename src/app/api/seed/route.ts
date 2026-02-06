@@ -1,26 +1,37 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { globalTemplates } from '@/seed/global-templates'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-// POST /api/seed – Ladda in globala mallar (kör bara en gång)
-export async function POST() {
-  // Kontrollera om globala mallar redan finns
-  const { data: existing } = await getSupabaseAdmin()
-    .from('report_templates')
-    .select('id')
-    .eq('is_global', true)
-    .limit(1)
+// POST /api/seed – Ladda in globala mallar (force=true ersätter befintliga)
+export async function POST(request: NextRequest) {
+  const admin = getSupabaseAdmin()
 
-  if (existing && existing.length > 0) {
-    return NextResponse.json({
-      data: { message: 'Globala mallar finns redan', skipped: true },
-    })
+  const url = new URL(request.url)
+  const force = url.searchParams.get('force') === 'true'
+
+  if (force) {
+    await admin
+      .from('report_templates')
+      .delete()
+      .eq('is_global', true)
+  } else {
+    const { data: existing } = await admin
+      .from('report_templates')
+      .select('id')
+      .eq('is_global', true)
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json({
+        data: { message: 'Globala mallar finns redan. Använd ?force=true för att ersätta.', skipped: true },
+      })
+    }
   }
 
   const results = []
 
   for (const template of globalTemplates) {
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await admin
       .from('report_templates')
       .insert({
         name: template.name,
