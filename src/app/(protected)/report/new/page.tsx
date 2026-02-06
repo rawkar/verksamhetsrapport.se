@@ -48,7 +48,7 @@ export default function NewReportPage() {
   }, [])
 
   const loadData = async () => {
-    // Hamta organisation
+    // Hämta organisation
     const orgRes = await fetch('/api/organizations')
     if (!orgRes.ok) {
       router.push('/onboarding')
@@ -62,7 +62,7 @@ export default function NewReportPage() {
     const currentOrg = orgData.data[0]
     setOrgId(currentOrg.id)
 
-    // Hamta mallar
+    // Hämta mallar
     const templateRes = await fetch(
       `/api/templates?org_id=${currentOrg.id}`
     )
@@ -70,7 +70,7 @@ export default function NewReportPage() {
       const templateData = await templateRes.json()
       setTemplates(templateData.data || [])
 
-      // Forvalj forsta mallen
+      // Förvalj första mallen
       if (templateData.data?.length > 0) {
         setSelectedTemplate(templateData.data[0].id)
       }

@@ -18,8 +18,8 @@ export default function GlobalError({
     <html>
       <body>
         <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui' }}>
-          <h2>Nagot gick fel</h2>
-          <p>Vi har loggat felet och jobbar pa en losning.</p>
+          <h2>Något gick fel</h2>
+          <p>Vi har loggat felet och jobbar på en lösning.</p>
           <button
             onClick={() => reset()}
             style={{
@@ -32,7 +32,7 @@ export default function GlobalError({
               cursor: 'pointer',
             }}
           >
-            Forsok igen
+            Försök igen
           </button>
         </div>
       </body>

@@ -121,9 +121,9 @@ export default function OnboardingPage() {
       case 3:
         return !!state.tonality
       case 4:
-        return true // Referensdokument ar valfritt
+        return true // Referensdokument är valfritt
       case 5:
-        return true // Mall ar valfritt, vi valjer default
+        return true // Mall är valfritt, vi väljer default
       default:
         return false
     }
@@ -139,7 +139,7 @@ export default function OnboardingPage() {
 
   const handleNext = async () => {
     if (state.step === 3 && !createdOrgId) {
-      // Skapa organisationen innan steg 4 (referensuppladdning behover org_id)
+      // Skapa organisationen innan steg 4 (referensuppladdning behöver org_id)
       setIsSubmitting(true)
       try {
         const orgRes = await fetch('/api/organizations', {
@@ -200,7 +200,7 @@ export default function OnboardingPage() {
         throw new Error('Organisation saknas. Gå tillbaka och försök igen.')
       }
 
-      // Om en mall ar vald, skapa en kopia for organisationen
+      // Om en mall är vald, skapa en kopia för organisationen
       if (state.selectedTemplate) {
         const selectedTemplate = templates.find((t) => t.id === state.selectedTemplate)
         if (selectedTemplate) {
@@ -454,7 +454,7 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Steg 5: Valj mall */}
+        {/* Steg 5: Välj mall */}
         {state.step === 5 && (
           <div className="animate-fadeIn">
             <h2 className="text-2xl font-bold mb-2">Välj en rapportmall</h2>

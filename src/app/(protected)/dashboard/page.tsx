@@ -73,7 +73,7 @@ export default function DashboardPage() {
   const loadData = async () => {
     setIsLoading(true)
 
-    // Hamta organisationer
+    // Hämta organisationer
     const orgRes = await fetch('/api/organizations')
     if (!orgRes.ok) {
       router.push('/onboarding')
@@ -89,7 +89,7 @@ export default function DashboardPage() {
     const currentOrg = orgData.data[0]
     setOrg(currentOrg)
 
-    // Hamta rapporter
+    // Hämta rapporter
     const reportRes = await fetch(`/api/reports?org_id=${currentOrg.id}`)
     if (reportRes.ok) {
       const reportData = await reportRes.json()
@@ -174,7 +174,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Uppgraderingsinfo for gratisplan */}
+      {/* Uppgraderingsinfo för gratisplan */}
       {org?.subscription_plan === 'free' && (
         <div className="card p-5 mb-8 border-[var(--color-accent)] bg-[rgba(209,107,28,0.03)]">
           <div className="flex items-start gap-3">
