@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Cloud, CloudOff, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Cloud, CloudOff, Loader2, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { useReportEditor } from '@/hooks/useReportEditor'
 import SectionList from './SectionList'
@@ -50,8 +50,37 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
     report.generation_metadata || undefined
   )
   const [customInstructions, setCustomInstructions] = useState('')
+  const reportOutputRef = useRef<HTMLDivElement>(null)
+  const [showScrollButton, setShowScrollButton] = useState(false)
 
   const hasContent = sections.some((s) => s.content.trim())
+
+  // Auto-scroll to report after generation
+  useEffect(() => {
+    if (generatedContent && !isGenerating && reportOutputRef.current) {
+      setTimeout(() => {
+        reportOutputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 300)
+    }
+  }, [generatedContent, isGenerating])
+
+  // Show sticky button when report exists but is not in view
+  useEffect(() => {
+    if (!generatedContent) {
+      setShowScrollButton(false)
+      return
+    }
+
+    const el = reportOutputRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowScrollButton(!entry.isIntersecting),
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [generatedContent])
 
   const handleAddSection = useCallback(
     (title: string) => {
@@ -166,7 +195,7 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
 
       {/* Generated output */}
       {generatedContent && (
-        <div className="mt-8">
+        <div className="mt-8" ref={reportOutputRef}>
           <ReportOutput
             reportId={report.id}
             content={generatedContent}
@@ -174,6 +203,20 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
             canExportPDF={canExportPDF}
           />
         </div>
+      )}
+
+      {/* Sticky scroll-to-report button */}
+      {showScrollButton && (
+        <button
+          type="button"
+          onClick={() =>
+            reportOutputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+          className="fixed bottom-6 right-6 btn btn-primary shadow-lg z-50 py-2.5 px-4"
+        >
+          <FileText className="w-4 h-4" />
+          Visa genererad rapport
+        </button>
       )}
 
       {/* Progress modal */}
