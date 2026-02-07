@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Cloud, CloudOff, Loader2, FileText } from 'lucide-react'
+import { ArrowLeft, Save, Cloud, CloudOff, Loader2, FileText, BookOpen } from 'lucide-react'
 import Link from 'next/link'
 import { useReportEditor } from '@/hooks/useReportEditor'
 import SectionList from './SectionList'
@@ -52,8 +52,20 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
   const [customInstructions, setCustomInstructions] = useState('')
   const reportOutputRef = useRef<HTMLDivElement>(null)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [hasReference, setHasReference] = useState<string | null>(null)
 
   const hasContent = sections.some((s) => s.content.trim())
+
+  // Check if org has a reference document
+  useEffect(() => {
+    fetch('/api/references')
+      .then((r) => r.json())
+      .then((data) => {
+        const analyzed = data.data?.find((d: { is_analyzed: boolean }) => d.is_analyzed)
+        setHasReference(analyzed?.file_name || null)
+      })
+      .catch(() => {})
+  }, [])
 
   // Auto-scroll to report after generation
   useEffect(() => {
@@ -191,8 +203,22 @@ export default function ReportEditor({ report, template, canExportPDF = false }:
         <AddSectionButton onAdd={handleAddSection} />
       </div>
 
-      {/* AI prompt settings */}
-      <div className="mt-4">
+      {/* Reference doc indicator + AI prompt settings */}
+      <div className="mt-4 space-y-3">
+        {hasReference && (
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[rgba(24,75,101,0.05)] border border-[rgba(24,75,101,0.15)] text-sm">
+            <BookOpen className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0" />
+            <span className="text-[var(--foreground-secondary)]">
+              Stilreferens: <span className="font-medium text-[var(--foreground)]">{hasReference}</span>
+            </span>
+            <Link
+              href="/settings?tab=references"
+              className="ml-auto text-xs text-[var(--color-primary)] hover:underline"
+            >
+              Hantera
+            </Link>
+          </div>
+        )}
         <PromptSettings
           customInstructions={customInstructions}
           onCustomInstructionsChange={setCustomInstructions}

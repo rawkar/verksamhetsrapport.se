@@ -112,18 +112,54 @@ VIKTIGT: Behåll ALLA detaljer, exempel, namn, datum och specifik information. F
   }
 
   private static buildStyleInstructions(analysis: StyleAnalysis): string {
-    let instructions = '\nSTILANPASSNING BASERAT PÅ REFERENSDOKUMENT:\n'
+    let instructions = '\nSTILANALYS FRÅN REFERENSDOKUMENT (VIKTIGT – följ denna stil noga):\n'
 
-    if (analysis.common_phrases && analysis.common_phrases.length > 0) {
-      instructions += `- Återanvänd gärna dessa typiska uttryck: ${analysis.common_phrases.slice(0, 10).join(', ')}\n`
+    if (analysis.analysis_summary) {
+      instructions += `Övergripande stil: ${analysis.analysis_summary}\n\n`
     }
+
+    instructions += 'Konkreta stilriktlinjer:\n'
 
     if (analysis.person_reference) {
       instructions += `- Referera till organisationen som: "${analysis.person_reference}"\n`
     }
 
-    if (analysis.analysis_summary) {
-      instructions += `- Övergripande stilbeskrivning: ${analysis.analysis_summary}\n`
+    if (analysis.tense_preference) {
+      const tenseMap: Record<string, string> = {
+        preteritum: 'Skriv i preteritum (dåtid)',
+        presens: 'Skriv i presens (nutid)',
+        blandat: 'Blanda preteritum och presens naturligt',
+      }
+      instructions += `- Tempus: ${tenseMap[analysis.tense_preference] || analysis.tense_preference}\n`
+    }
+
+    if (analysis.vocabulary_level) {
+      const vocabMap: Record<string, string> = {
+        simple: 'Använd enkelt, lättillgängligt språk',
+        professional: 'Använd professionellt fackspråk',
+        academic: 'Använd akademiskt och formellt språk',
+      }
+      instructions += `- Ordnivå: ${vocabMap[analysis.vocabulary_level] || analysis.vocabulary_level}\n`
+    }
+
+    if (analysis.paragraph_style) {
+      instructions += `- Stycken: ${analysis.paragraph_style}\n`
+    }
+
+    if (analysis.avg_sentence_length) {
+      instructions += `- Genomsnittlig meningslängd i referensen: ~${Math.round(analysis.avg_sentence_length)} ord. Matcha detta.\n`
+    }
+
+    if (analysis.section_transition_style) {
+      instructions += `- Övergångar mellan avsnitt: ${analysis.section_transition_style}\n`
+    }
+
+    if (analysis.number_presentation) {
+      instructions += `- Sifferpresentation: ${analysis.number_presentation}\n`
+    }
+
+    if (analysis.common_phrases && analysis.common_phrases.length > 0) {
+      instructions += `- Typiska uttryck att återanvända: ${analysis.common_phrases.slice(0, 10).join(', ')}\n`
     }
 
     return instructions

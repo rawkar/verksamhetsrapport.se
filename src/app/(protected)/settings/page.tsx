@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, Save, Building2, Users, FileText, CreditCard, Upload, Trash2, CheckCircle2 } from 'lucide-react'
 import BillingOverview from '@/components/billing/BillingOverview'
 import UpgradeBanner from '@/components/billing/UpgradeBanner'
@@ -104,17 +104,34 @@ interface Member {
 type Tab = 'organization' | 'team' | 'references' | 'billing'
 
 export default function SettingsPage() {
+  return (
+    <Suspense>
+      <SettingsContent />
+    </Suspense>
+  )
+}
+
+function SettingsContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [org, setOrg] = useState<Org | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [tab, setTab] = useState<Tab>('organization')
+  const initialTab = (searchParams.get('tab') as Tab) || 'organization'
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviting, setInviting] = useState(false)
   const [references, setReferences] = useState<ReferenceDoc[]>([])
+
+  const switchTab = (newTab: Tab) => {
+    setTab(newTab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', newTab)
+    window.history.replaceState({}, '', url.toString())
+  }
 
   useEffect(() => {
     loadData()
@@ -215,7 +232,7 @@ export default function SettingsPage() {
           return (
             <button
               key={t.key}
-              onClick={() => setTab(t.key)}
+              onClick={() => switchTab(t.key)}
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                 tab === t.key
                   ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
