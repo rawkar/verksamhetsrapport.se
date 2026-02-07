@@ -87,7 +87,7 @@ export default function ResetPasswordPage() {
                   Nytt lösenord
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)] pointer-events-none" />
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -96,7 +96,8 @@ export default function ResetPasswordPage() {
                     placeholder="Minst 8 tecken"
                     required
                     minLength={8}
-                    className="input pl-10 pr-10"
+                    className="input"
+                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                     disabled={isLoading}
                     autoFocus
                   />
@@ -119,7 +120,7 @@ export default function ResetPasswordPage() {
                   Bekräfta lösenord
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)] pointer-events-none" />
                   <input
                     id="confirm-password"
                     type={showPassword ? 'text' : 'password'}
@@ -128,7 +129,8 @@ export default function ResetPasswordPage() {
                     placeholder="Upprepa lösenord"
                     required
                     minLength={8}
-                    className="input pl-10"
+                    className="input"
+                    style={{ paddingLeft: '2.5rem' }}
                     disabled={isLoading}
                   />
                 </div>

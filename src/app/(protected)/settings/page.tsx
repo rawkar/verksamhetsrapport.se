@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Loader2, Save, Building2, Users, FileText, CreditCard, Upload, Trash2, CheckCircle2 } from 'lucide-react'
+import { Loader2, Save, Building2, Users, FileText, CreditCard, Upload, Trash2, CheckCircle2, ExternalLink } from 'lucide-react'
 import BillingOverview from '@/components/billing/BillingOverview'
 import UpgradeBanner from '@/components/billing/UpgradeBanner'
 import ReferenceUploader from '@/components/report/ReferenceUploader'
@@ -26,6 +26,7 @@ function ReferenceList({
   onDeleted: () => void
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [openingId, setOpeningId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
     if (!confirm('Är du säker på att du vill ta bort detta referensdokument?')) return
@@ -35,13 +36,44 @@ function ReferenceList({
     setDeletingId(null)
   }
 
+  const handleOpen = async (id: string) => {
+    setOpeningId(id)
+    try {
+      const res = await fetch(`/api/references/${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url) {
+          window.open(data.url, '_blank')
+        }
+      }
+    } finally {
+      setOpeningId(null)
+    }
+  }
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  if (references.length === 0) return null
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr)
+    const months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+  }
+
+  if (references.length === 0) {
+    return (
+      <div className="card p-8 text-center">
+        <FileText className="w-12 h-12 text-[var(--foreground-muted)] mx-auto mb-3 opacity-50" />
+        <h3 className="font-medium mb-1">Inga referensdokument</h3>
+        <p className="text-sm text-[var(--foreground-muted)]">
+          Ladda upp en tidigare verksamhetsberättelse ovan så lär sig AI:n er stil.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -53,7 +85,7 @@ function ReferenceList({
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{ref.file_name}</p>
               <p className="text-xs text-[var(--foreground-muted)]">
-                {formatSize(ref.file_size_bytes)} · {ref.file_type.toUpperCase()}
+                {formatSize(ref.file_size_bytes)} · {ref.file_type.toUpperCase()} · {formatDate(ref.created_at)}
                 {ref.is_analyzed && (
                   <span className="ml-2 text-[var(--color-success)]">
                     <CheckCircle2 className="w-3 h-3 inline mr-0.5" />
@@ -62,6 +94,18 @@ function ReferenceList({
                 )}
               </p>
             </div>
+            <button
+              onClick={() => handleOpen(ref.id)}
+              disabled={openingId === ref.id}
+              className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--color-primary)] hover:bg-[rgba(24,75,101,0.05)] transition-colors"
+              title="Öppna"
+            >
+              {openingId === ref.id ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ExternalLink className="w-4 h-4" />
+              )}
+            </button>
             <button
               onClick={() => handleDelete(ref.id)}
               disabled={deletingId === ref.id}

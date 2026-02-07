@@ -251,7 +251,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Input styling */
 .input {
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
   background: var(--background);
   border: 1.5px solid var(--trs-main-4);
   border-radius: var(--radius);

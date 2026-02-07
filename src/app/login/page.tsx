@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { FileText, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
+import { FileText, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle2, RefreshCw } from 'lucide-react'
 
 export default function LoginPage() {
   return (
@@ -27,6 +27,9 @@ function LoginForm() {
     type: 'success' | 'error'
     text: string
   } | null>(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
+  const [resending, setResending] = useState(false)
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
@@ -54,7 +57,8 @@ function LoginForm() {
         if (error.message === 'Invalid login credentials') {
           setMessage({ type: 'error', text: 'Fel e-post eller lösenord.' })
         } else if (error.message === 'Email not confirmed') {
-          setMessage({ type: 'error', text: 'Du behöver bekräfta din e-post först. Kolla din inkorg.' })
+          setRegisteredEmail(email)
+          setShowConfirmation(true)
         } else {
           setMessage({ type: 'error', text: error.message })
         }
@@ -101,10 +105,8 @@ function LoginForm() {
           setMessage({ type: 'error', text: error.message })
         }
       } else {
-        setMessage({
-          type: 'success',
-          text: 'Konto skapat! Kolla din e-post för att bekräfta kontot.',
-        })
+        setRegisteredEmail(email)
+        setShowConfirmation(true)
         setPassword('')
         setConfirmPassword('')
       }
@@ -162,6 +164,31 @@ function LoginForm() {
     }
   }
 
+  const handleResendConfirmation = async () => {
+    setResending(true)
+    setMessage(null)
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: registeredEmail,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+        },
+      })
+
+      if (error) {
+        setMessage({ type: 'error', text: error.message })
+      } else {
+        setMessage({ type: 'success', text: 'Nytt bekräftelsemail skickat! Kolla din inkorg.' })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Kunde inte skicka mailet. Försök igen senare.' })
+    } finally {
+      setResending(false)
+    }
+  }
+
   const titles: Record<Mode, string> = {
     login: 'Logga in',
     register: 'Skapa konto',
@@ -195,6 +222,55 @@ function LoginForm() {
 
       {/* Login-kort */}
       <div className="w-full max-w-md card p-8">
+        {showConfirmation ? (
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full bg-[rgba(48,145,154,0.1)] flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-[var(--color-success)]" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Bekräfta din e-post</h2>
+            <p className="text-[var(--foreground-muted)] mb-6">
+              Vi har skickat ett bekräftelsemail till{' '}
+              <span className="font-medium text-[var(--foreground)]">{registeredEmail}</span>.
+              Klicka på länken i mailet för att aktivera ditt konto.
+            </p>
+
+            {message && (
+              <div
+                className={`mb-4 p-3 rounded-lg text-sm ${
+                  message.type === 'success'
+                    ? 'bg-[rgba(48,145,154,0.1)] text-[var(--color-success)]'
+                    : 'bg-[rgba(255,43,15,0.1)] text-[var(--color-error)]'
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
+
+            <button
+              onClick={handleResendConfirmation}
+              disabled={resending}
+              className="btn btn-secondary w-full mb-3"
+            >
+              {resending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {resending ? 'Skickar...' : 'Inget mail? Skicka igen'}
+            </button>
+
+            <button
+              onClick={() => {
+                setShowConfirmation(false)
+                switchMode('login')
+              }}
+              className="text-sm text-[var(--color-primary)] hover:underline font-medium"
+            >
+              Tillbaka till inloggning
+            </button>
+          </div>
+        ) : (
+        <>
         <h2 className="text-xl font-semibold text-center mb-6">
           {titles[mode]}
         </h2>
@@ -210,7 +286,7 @@ function LoginForm() {
               E-postadress
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)] pointer-events-none" />
               <input
                 id="email"
                 type="email"
@@ -218,7 +294,8 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="din@email.se"
                 required
-                className="input pl-10"
+                className="input"
+                style={{ paddingLeft: '2.5rem' }}
                 disabled={isLoading}
               />
             </div>
@@ -234,7 +311,7 @@ function LoginForm() {
                 Lösenord
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)] pointer-events-none" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -243,7 +320,8 @@ function LoginForm() {
                   placeholder={mode === 'register' ? 'Minst 8 tecken' : 'Ditt lösenord'}
                   required
                   minLength={mode === 'register' ? 8 : undefined}
-                  className="input pl-10 pr-10"
+                  className="input"
+                  style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                   disabled={isLoading}
                 />
                 <button
@@ -268,7 +346,7 @@ function LoginForm() {
                 Bekräfta lösenord
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)] pointer-events-none" />
                 <input
                   id="confirm-password"
                   type={showPassword ? 'text' : 'password'}
@@ -277,7 +355,8 @@ function LoginForm() {
                   placeholder="Upprepa lösenord"
                   required
                   minLength={8}
-                  className="input pl-10"
+                  className="input"
+                  style={{ paddingLeft: '2.5rem' }}
                   disabled={isLoading}
                 />
               </div>
@@ -414,6 +493,8 @@ function LoginForm() {
             </a>
             .
           </p>
+        )}
+        </>
         )}
       </div>
 
